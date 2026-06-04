@@ -4,7 +4,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { useClickOutside } from "@/hooks/useClickOutside";
 
-interface DropdownProps {
+export interface DropdownProps {
   trigger: ReactNode;
   children: ReactNode;
   align?: "left" | "right";

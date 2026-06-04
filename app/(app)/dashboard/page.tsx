@@ -21,12 +21,17 @@ export default async function DashboardPage() {
 
   await connectDB();
   const [activeProjects, myOpenTasks, myCompletedTasks] = await Promise.all([
-    Project.countDocuments({ memberIds: userId, status: "active" }),
+    Project.countDocuments({
+      $or: [{ ownerId: userId }, { memberIds: userId }],
+      status: "active",
+    }),
     Task.countDocuments({ assigneeId: userId, status: { $in: ["todo", "in_progress"] } }),
     Task.countDocuments({ assigneeId: userId, status: "completed" }),
   ]);
 
-  const recentProjectsRaw = await Project.find({ memberIds: userId })
+  const recentProjectsRaw = await Project.find({
+    $or: [{ ownerId: userId }, { memberIds: userId }],
+  })
     .sort({ updatedAt: -1 })
     .limit(4)
     .select("name status deadline")
@@ -34,7 +39,7 @@ export default async function DashboardPage() {
   const recentProjects = recentProjectsRaw as Array<{
     _id: mongoose.Types.ObjectId;
     name: string;
-    status: "active" | "completed" | "archived";
+    status: "active" | "completed" | "on_hold";
     deadline?: Date;
   }>;
 
@@ -73,8 +78,8 @@ export default async function DashboardPage() {
                     <div className="font-medium text-foreground truncate">{p.name}</div>
                     {p.deadline && <div className="text-xs text-muted-foreground">Due {new Date(p.deadline).toLocaleDateString()}</div>}
                   </div>
-                  <Badge variant={p.status === "active" ? "primary" : p.status === "completed" ? "success" : "muted"}>
-                    {p.status}
+                  <Badge variant={p.status === "active" ? "primary" : p.status === "completed" ? "success" : "warning"}>
+                    {p.status.replace("_", " ")}
                   </Badge>
                 </Link>
               ))

@@ -1,7 +1,15 @@
 import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
-export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export type CardProps = HTMLAttributes<HTMLDivElement>;
+export type CardStatProps = {
+  label: string;
+  value: ReactNode;
+  icon?: ReactNode;
+  trend?: { value: string; up: boolean };
+};
+
+export function Card({ className, ...props }: CardProps) {
   return (
     <div
       className={cn(
@@ -34,7 +42,8 @@ export function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElemen
   return <div className={cn("px-5 py-3 border-t border-border", className)} {...props} />;
 }
 
-export function CardStat({ label, value, icon, trend }: { label: string; value: ReactNode; icon?: ReactNode; trend?: { value: string; up: boolean } }) {
+export function CardStat(props: CardStatProps) {
+  const { label, value, icon, trend } = props;
   return (
     <Card className="p-5">
       <div className="flex items-center justify-between">

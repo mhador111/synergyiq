@@ -1,6 +1,10 @@
 import { cn } from "@/lib/utils/cn";
 
-export function Skeleton({ className }: { className?: string }) {
+export interface SkeletonProps {
+  className?: string;
+}
+
+export function Skeleton({ className }: SkeletonProps) {
   return <div className={cn("skeleton", className)} />;
 }
 

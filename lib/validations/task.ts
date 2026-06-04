@@ -35,6 +35,16 @@ export const taskStatusSchema = z.object({
   status: z.enum(TASK_STATUSES),
 });
 
+export const taskIdSchema = z.object({
+  id: z.string().min(1, "Task id is required"),
+});
+
+export const taskAssignSchema = z.object({
+  id: z.string().min(1, "Task id is required"),
+  assigneeId: z.string().nullable(),
+});
+
 export type TaskCreateInput = z.infer<typeof taskCreateSchema>;
 export type TaskUpdateInput = z.infer<typeof taskUpdateSchema>;
 export type TaskStatusInput = z.infer<typeof taskStatusSchema>;
+export type TaskAssignInput = z.infer<typeof taskAssignSchema>;

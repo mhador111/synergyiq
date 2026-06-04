@@ -1,45 +1,68 @@
-import { forwardRef, type SelectHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, type SelectHTMLAttributes } from "react";
 import { cn } from "@/lib/utils/cn";
 
-export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+export interface SelectOption {
+  label: string;
+  value: string;
+}
+
+export interface SelectProps
+  extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "children"> {
   label?: string;
   error?: string;
   hint?: string;
-  children: ReactNode;
+  options: SelectOption[];
+  placeholder?: string;
 }
 
+const chevronSvg =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>";
+
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { className, label, error, hint, id, children, ...props },
+  { label, error, hint, options, placeholder, className, id, ...props },
   ref,
 ) {
   const inputId = id ?? props.name;
+
   return (
-    <div className="w-full space-y-1.5">
+    <div className="w-full">
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-foreground">
+        <label
+          htmlFor={inputId}
+          className="block text-sm font-medium text-foreground mb-1.5"
+        >
           {label}
         </label>
       )}
       <select
         id={inputId}
         ref={ref}
+        style={{ backgroundImage: `url("${chevronSvg}")` }}
         className={cn(
-          "block w-full h-10 rounded-lg border bg-surface-elevated text-foreground px-3 pr-8 appearance-none",
+          "block w-full h-10 rounded-lg border bg-surface-elevated text-foreground px-3 pr-9 appearance-none",
           "border-input focus:border-ring focus:ring-2 focus:ring-ring/20 transition-colors cursor-pointer",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           "bg-[length:16px] bg-no-repeat bg-[position:right_0.625rem_center]",
-          "bg-[url('data:image/svg+xml;utf8,<svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2020%2020%22%20fill=%22%2364748b%22><path%20fill-rule=%22evenodd%22%20d=%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.06l3.71-3.83a.75.75%200%20111.08%201.04l-4.25%204.39a.75.75%200%2001-1.08%200L5.21%208.27a.75.75%200%2001.02-1.06z%22%20clip-rule=%22evenodd%22/></svg>')]",
           error && "border-danger focus:border-danger focus:ring-danger/20",
           className,
         )}
         {...props}
       >
-        {children}
+        {placeholder && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
       </select>
       {error ? (
-        <p className="text-xs text-danger">{error}</p>
+        <p className="mt-1 text-xs text-danger">{error}</p>
       ) : hint ? (
-        <p className="text-xs text-muted-foreground">{hint}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
       ) : null}
     </div>
   );

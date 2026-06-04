@@ -1,5 +1,13 @@
+import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth/auth";
+import { authEdgeConfig } from "@/lib/auth/edge-config";
+
+/**
+ * Edge-runtime auth instance. Built from `authEdgeConfig` so the
+ * Mongoose-loaded `lib/auth/auth.ts` is never pulled into the
+ * middleware bundle.
+ */
+const { auth } = NextAuth(authEdgeConfig);
 
 export default auth((req) => {
   const isLoggedIn = Boolean(req.auth);
@@ -11,7 +19,13 @@ export default auth((req) => {
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico" ||
     pathname === "/";
-  const isDashboard = pathname.startsWith("/dashboard") || pathname.startsWith("/projects") || pathname.startsWith("/tasks") || pathname.startsWith("/team") || pathname.startsWith("/analytics") || pathname.startsWith("/activity");
+  const isDashboard =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/projects") ||
+    pathname.startsWith("/tasks") ||
+    pathname.startsWith("/team") ||
+    pathname.startsWith("/analytics") ||
+    pathname.startsWith("/activity");
 
   if (isAuthPage && isLoggedIn) {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));

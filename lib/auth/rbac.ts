@@ -1,4 +1,4 @@
-import type { Role } from "@/lib/models/user";
+import type { Role } from "@/lib/auth/roles";
 
 export const ROLES_RANK: Record<Role, number> = {
   admin: 3,

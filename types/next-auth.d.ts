@@ -1,4 +1,4 @@
-import type { Role } from "@/lib/models/user";
+import type { Role } from "@/lib/auth/roles";
 import "next-auth";
 import "next-auth/jwt";
 

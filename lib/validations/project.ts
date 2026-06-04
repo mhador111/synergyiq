@@ -19,7 +19,20 @@ export const projectCreateSchema = z.object({
   memberIds: z.array(z.string()).default([]),
 });
 
-export const projectUpdateSchema = projectCreateSchema.partial();
+export const projectUpdateSchema = projectCreateSchema.partial().extend({
+  id: z.string().min(1, "Project id is required"),
+});
+
+export const projectIdSchema = z.object({
+  id: z.string().min(1, "Project id is required"),
+});
+
+export const addMemberSchema = z.object({
+  projectId: z.string().min(1, "Project id is required"),
+  userId: z.string().min(1, "User id is required"),
+});
+
+export const removeMemberSchema = addMemberSchema;
 
 export type ProjectCreateInput = z.infer<typeof projectCreateSchema>;
 export type ProjectUpdateInput = z.infer<typeof projectUpdateSchema>;

@@ -14,6 +14,7 @@ const taskSchema = new Schema(
     dueDate: { type: Date, required: true, index: true },
     priority: { type: String, enum: PRIORITIES, default: "medium", index: true },
     status: { type: String, enum: TASK_STATUSES, default: "todo", index: true },
+    position: { type: Number, default: 0, index: true },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true },
@@ -24,6 +25,7 @@ taskSchema.index(
   { projectId: 1, title: 1 },
   { unique: true, collation: { locale: "en", strength: 2 } },
 );
+taskSchema.index({ projectId: 1, status: 1, position: 1 });
 taskSchema.index({ title: "text", description: "text" });
 
 export type TaskDoc = InferSchemaType<typeof taskSchema> & { _id: mongoose.Types.ObjectId };

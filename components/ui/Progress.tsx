@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils/cn";
 
-interface ProgressProps {
+export interface ProgressProps {
   value: number; // 0-100
   className?: string;
   indicatorClassName?: string;
