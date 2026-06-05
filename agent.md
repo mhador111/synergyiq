@@ -10,7 +10,7 @@
 |---|---|
 | **Name** | **SynergyIQ** — Smart Project & Task Collaboration System |
 | **Type** | Full-stack web app (assessment deliverable, 4-day deadline) |
-| **Repo root** | `project-collab/` |
+| **Repo root** | `project-collab/` (local folder name) — GitHub repo is **`iammhador/synergyiq`** |
 | **Deploy target** | Vercel (with MongoDB Atlas free tier) |
 | **Brand palette** | Indigo-on-slate (light & dark) |
 | **Typography** | Geist Sans + Geist Mono via `next/font` |
@@ -271,10 +271,10 @@ npm run dev
 
 | Day | Focus | Status |
 |---|---|---|
-| **1** | Project init, deps, models, auth, Redux, SWR, UI lib, layout shell, landing + login + signup + dashboard skeleton, seed | ✅ **DONE** (verified end-to-end: `tsc` clean, `npm run seed` writes 3 users / 1 project / 12 tasks / 3 comments / 4 activities; `POST /api/auth/callback/credentials` returns 302 with session cookie; `/dashboard` returns 200 for authenticated users, 307 to `/login` otherwise) |
-| **2** | Projects + Tasks core CRUD. Server actions in `actions/`, project list (DataTable), project detail (Kanban), task CRUD, status updates, activity log wired through `logActivity()` | ⏳ next |
-| **3** | Team page (invite, role change, workload), task comments, notification center, global search with debounce, analytics page (Recharts) | ⏳ |
-| **4** | Loading/error boundaries, security headers, README, **agent.md + skills.md** (this file), `.env.example`, lint pass, Vercel deploy with Atlas | ⏳ |
+| **1** | Project init, deps, models, auth, Redux, SWR, UI lib, layout shell, landing + login + signup + dashboard skeleton, seed | ✅ **DONE** (commit `06e8ffc` on `main`, verified end-to-end) |
+| **2** | Projects + Tasks core CRUD — **API route handlers** in `app/api/{projects,tasks,users}/`, SWR hooks in `hooks/useProjects.ts`, project list page, project detail page (Kanban), new-project form, DataTable primitive, activity log wired through `logActivity()`. Server actions also exist in `actions/` but UI goes through the route handlers. | ✅ **DONE** (commit `cad66dd` on `main`, on the office computer — pull `origin/main` to get it locally) |
+| **3** | Team page (invite, role change, workload), task comments, notification center, global search with debounce, analytics page (Recharts) | ⏳ next |
+| **4** | Loading/error boundaries, security headers, README, handoff docs, lint pass, Vercel deploy with Atlas | ⏳ |
 
 ---
 
@@ -304,13 +304,18 @@ npm run dev
 | Login | `app/(auth)/login/page.tsx`, `lib/validations/auth.ts`, `app/api/auth/[...nextauth]/route.ts` |
 | Signup | `app/(auth)/signup/page.tsx`, `app/api/auth/signup/route.ts` |
 | Dashboard | `app/(app)/dashboard/page.tsx`, `app/(app)/layout.tsx`, `components/layout/AppShell.tsx` |
+| Projects list | `app/(app)/projects/page.tsx`, `hooks/useProjects.ts` (`useProjects`), `app/api/projects/route.ts` |
+| Project detail (Kanban) | `app/(app)/projects/[id]/page.tsx`, `components/projects/{KanbanBoard,ProjectDetailView}.tsx`, `hooks/useProjects.ts` (`useProject`) |
+| New project | `app/(app)/projects/new/page.tsx`, `components/projects/NewProjectForm.tsx` |
+| Project mutations | `actions/projects.ts` (server actions) — also exposed via `app/api/projects/[id]/route.ts` |
+| Task mutations | `actions/tasks.ts` (server actions) — also exposed via `app/api/tasks/route.ts` |
 | Models | `lib/models/{user,project,task,comment,activity,notification}.ts` |
 | Seed | `scripts/seed.ts` |
-| Auth config | `lib/auth/auth.ts`, `lib/auth/rbac.ts`, `middleware.ts` |
-| Redux | `lib/redux/store.ts`, `lib/redux/slices/{authSlice,uiSlice}.ts`, `lib/redux/provider.tsx` |
-| SWR | `lib/swr/{fetcher,keys}.ts` |
-| UI lib | `components/ui/{Button,Input,Card,Badge,...}.tsx` + `index.ts` |
-| Layout shell | `components/layout/{Sidebar,Header,AppShell,MobileSidebar,PageHeader,Logo,ThemeToggle}.tsx` |
+| Auth config | `lib/auth/auth.ts`, `lib/auth/{rbac,roles,middleware,edge-config}.ts`, `middleware.ts` (root) |
+| Redux | `lib/redux/{store,StoreProvider}.tsx`, `lib/redux/slices/{authSlice,uiSlice}.ts` |
+| SWR | `lib/swr/{fetcher,keys}.ts`, `hooks/useProjects.ts` |
+| UI lib | `components/ui/{Button,Input,Card,Badge,DataTable,...}.tsx` + `index.ts` |
+| Layout shell | `components/layout/{Sidebar,Header,AppShell,MobileSidebar,PageHeader,Logo,ThemeToggle,AuthHydrator,ThemeApplier}.tsx` |
 
 ---
 

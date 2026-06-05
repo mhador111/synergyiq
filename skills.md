@@ -8,7 +8,7 @@
 | 🟡 in-progress | Partially done — see note column |
 | ⬜ todo | Planned, not started |
 
-Last updated: **2026-06-02** (end of Day 1)
+Last updated: **2026-06-05** (end of Day 2, after pulling office computer's work)
 
 ---
 
@@ -23,7 +23,7 @@ Last updated: **2026-06-02** (end of Day 1)
 | Geist Sans + Geist Mono via `next/font` | ✅ | `app/layout.tsx` | `geistSans` + `geistMono` from `geist` package, applied via CSS vars `--font-sans`, `--font-mono`. |
 | `npm run typecheck` script | ✅ | `package.json` | `tsc --noEmit` |
 | `npm run seed` script | ✅ | `package.json` → `tsx scripts/seed.ts` | Requires `dotenv` (`import "dotenv/config"`) and a running `mongod`. |
-| `.env.example` | ⬜ | — | Will mirror `.env.local` keys: `MONGODB_URI`, `AUTH_SECRET`, `NEXTAUTH_URL`. |
+| `.env.example` | ✅ | `.env.example` | `MONGODB_URI`, `AUTH_SECRET`, `NEXTAUTH_URL`, `NEXT_PUBLIC_APP_NAME`. `.gitignore` has `!.env.example` exception. |
 
 ---
 
@@ -39,10 +39,10 @@ Last updated: **2026-06-02** (end of Day 1)
 | Activity model | ✅ | `lib/models/activity.ts` | Snake_case types (`project_created`), `message` is required. |
 | Notification model | ✅ | `lib/models/notification.ts` | |
 | Zod v3 schemas (auth) | ✅ | `lib/validations/auth.ts` | `loginSchema`, `signupSchema` |
-| Zod v3 schemas (project) | ⬜ | `lib/validations/project.ts` | For Day 2 server actions. |
-| Zod v3 schemas (task) | ⬜ | `lib/validations/task.ts` | For Day 2 server actions. |
+| Zod v3 schemas (project) | ✅ | `lib/validations/project.ts` | `projectCreateSchema`, `projectUpdateSchema`, `addMemberSchema`, `removeMemberSchema`, `projectIdSchema`. |
+| Zod v3 schemas (task) | ✅ | `lib/validations/task.ts` | `taskCreateSchema`, `taskUpdateSchema`, `assignTaskSchema`, `updateStatusSchema`. |
 | Zod v3 schemas (comment) | ⬜ | `lib/validations/comment.ts` | For Day 3. |
-| `logActivity()` helper | 🟡 | `lib/utils/activity.ts` | Helper exists but is **not yet called from any server action** (because there are no server actions yet). Day 2. |
+| `logActivity()` helper | ✅ | `lib/utils/activity.ts` | Called from `actions/projects.ts` and `actions/tasks.ts` for create/update/delete/status/member events. |
 | Seed script (3 users, 1 project, 12 tasks, 3 comments, 4 activities) | ✅ | `scripts/seed.ts` | Verified: `npm run seed` completes; counts match. |
 | Verify seed counts script | ⬜ | — | Was a one-off `scripts/verify.ts`, deleted after use. Re-create if needed. |
 
@@ -59,7 +59,7 @@ Last updated: **2026-06-02** (end of Day 1)
 | `next-auth.d.ts` module augmentation | ✅ | `types/next-auth.d.ts` | Adds `id` and `role` to `Session["user"]` and `User`. |
 | Signup API route | ✅ | `app/api/auth/signup/route.ts` | Validates with `signupSchema`, hashes password, creates user. Returns `{"ok": true}`. |
 | `hasRole(user, "manager")` rank helper | ✅ | `lib/auth/rbac.ts` | Numeric ranks: admin=3, manager=2, member=1. |
-| `middleware.ts` route protection | ⬜ | `middleware.ts` | Will guard `/dashboard`, `/projects`, `/tasks`, `/team`, `/analytics` on Day 2. |
+| `middleware.ts` route protection | ✅ | `middleware.ts` at root + `lib/auth/edge-config.ts` (edge-safe subset) + `lib/auth/middleware.ts` (full guard). Guards `/dashboard`, `/projects`, `/tasks`, `/team`, `/analytics`. |
 | Demo login button | ✅ | `app/(auth)/login/page.tsx` | Pre-fills admin creds and submits. |
 
 ---
@@ -84,10 +84,11 @@ Last updated: **2026-06-02** (end of Day 1)
 |---|---|---|---|
 | Global `fetcher` (JSON) | ✅ | `lib/swr/fetcher.ts` | Throws on non-OK. |
 | Centralized key constants | ✅ | `lib/swr/keys.ts` | `keys.projects.list()`, `keys.tasks.byProject(id)`, etc. |
-| `useProjects()` hook | ⬜ | `hooks/useProjects.ts` | Day 2 — list page. |
-| `useProject(id)` hook | ⬜ | `hooks/useProject.ts` | Day 2 — detail page. |
-| `useTasks(projectId)` hook | ⬜ | `hooks/useTasks.ts` | Day 2 — Kanban. |
-| Optimistic update on task status change | ⬜ | — | Day 2 — `mutate()` with rollback. |
+| `useProjects()` hook | ✅ | `hooks/useProjects.ts` | Hits `/api/projects`. |
+| `useProject(id)` hook | ✅ | `hooks/useProjects.ts` | Hits `/api/projects/${id}`. |
+| `useTasks(params)` hook | ✅ | `hooks/useProjects.ts` | Hits `/api/tasks?projectId=…&mine=…&status=…`. |
+| `useUsers()` hook | ✅ | `hooks/useProjects.ts` | Hits `/api/users` — for assignee pickers. |
+| Optimistic update on task status change | 🟡 | `components/projects/KanbanBoard.tsx` | Partial — local state updates; revalidate via `mutate`. Full rollback-on-error still pending. |
 
 ---
 
@@ -112,7 +113,7 @@ All hand-rolled, Tailwind-only, **no** shadcn, **no** Radix. Forward refs.
 | `Progress` | ✅ | For task/project completion bars. |
 | `Toaster` | ✅ | Wraps `react-hot-toast`. |
 | `index.ts` barrel | ✅ | Re-exports everything for `import { Button } from "@/components/ui"`. |
-| `Table` / `DataTable` | ⬜ | Day 2 — projects list. |
+| `Table` / `DataTable` | ✅ | Used by `app/(app)/projects/page.tsx`. |
 
 ---
 
@@ -140,11 +141,11 @@ All hand-rolled, Tailwind-only, **no** shadcn, **no** Radix. Forward refs.
 | `/login` | ✅ | React Hook Form + Zod, demo login button. |
 | `/signup` | ✅ | Name/email/password/role form. |
 | `/dashboard` | ✅ | 4 KPI cards + recent projects list. (Verified end-to-end.) |
-| `/projects` | ⬜ | Day 2 — DataTable with filters, search, status toggle. |
-| `/projects/new` | ⬜ | Day 2 — create form. |
-| `/projects/[id]` | ⬜ | Day 2 — project detail with Kanban board. |
-| `/projects/[id]/settings` | ⬜ | Day 2 — members management. |
-| `/tasks` (my tasks) | ⬜ | Day 2 — assignee-scoped task list. |
+| `/projects` | ✅ | DataTable with search + status filter. |
+| `/projects/new` | ✅ | Create form (RHF + Zod). |
+| `/projects/[id]` | ✅ | Project detail with Kanban (`KanbanBoard`), member sidebar, task create. |
+| `/projects/[id]/settings` | ⬜ | Members management — partial (add/remove via actions exists, no dedicated page yet). |
+| `/tasks` (my tasks) | ⬜ | Day 3 — assignee-scoped list (the API route already supports `?mine=1`). |
 | `/team` | ⬜ | Day 3 — member list, invite, role change. |
 | `/analytics` | ⬜ | Day 3 — Recharts (priority/status/progress/productivity). |
 | `/notifications` (page) | ⬜ | Day 3 — full-page view (mostly a dropdown in header). |
@@ -156,16 +157,16 @@ All hand-rolled, Tailwind-only, **no** shadcn, **no** Radix. Forward refs.
 
 | Action | Status | Notes |
 |---|---|---|
-| `createProject` | ⬜ | Day 2. Validate with `projectSchema`. Call `logActivity("project_created")`. |
-| `updateProject` | ⬜ | Day 2. |
-| `deleteProject` | ⬜ | Day 2. Manager+ only. |
-| `addProjectMember` | ⬜ | Day 2. |
-| `removeProjectMember` | ⬜ | Day 2. |
-| `createTask` | ⬜ | Day 2. |
-| `updateTask` | ⬜ | Day 2. |
-| `updateTaskStatus` | ⬜ | Day 2. Optimistic SWR. Logs `task_status_changed`. |
-| `assignTask` | ⬜ | Day 2. Logs `task_assigned`. |
-| `deleteTask` | ⬜ | Day 2. |
+| `createProject` | ✅ | `actions/projects.ts`. Zod-validated, `logActivity("project_created")`. |
+| `updateProject` | ✅ | `actions/projects.ts`. |
+| `deleteProject` | ✅ | `actions/projects.ts`. Manager+ only (`hasRole`). |
+| `addProjectMember` | ✅ | `actions/projects.ts`. |
+| `removeProjectMember` | ✅ | `actions/projects.ts`. |
+| `createTask` | ✅ | `actions/tasks.ts`. |
+| `updateTask` | ✅ | `actions/tasks.ts`. |
+| `updateTaskStatus` | ✅ | `actions/tasks.ts`. Logs `task_status_changed`. |
+| `assignTask` | ✅ | `actions/tasks.ts`. Logs `task_assigned`. |
+| `deleteTask` | ✅ | `actions/tasks.ts`. |
 | `addComment` | ⬜ | Day 3. |
 | `markNotificationRead` | ⬜ | Day 3. |
 
@@ -175,7 +176,7 @@ All hand-rolled, Tailwind-only, **no** shadcn, **no** Radix. Forward refs.
 
 | Skill | Status | Notes |
 |---|---|---|
-| Optimistic SWR mutations | ⬜ | Day 2 — for task status moves. |
+| Optimistic SWR mutations | 🟡 | Partial in `KanbanBoard` — local re-order only. |
 | Debounced search input | ⬜ | Day 3 — `useDebounce` hook exists (`hooks/useDebounce.ts`). |
 | Toast on action success/error | ✅ | `<Toaster />` is mounted in root layout; use `toast.success()` / `toast.error()` from `react-hot-toast`. |
 | Loading.tsx per route | ⬜ | Day 4 polish. |
