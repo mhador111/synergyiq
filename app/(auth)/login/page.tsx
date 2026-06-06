@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,12 +25,30 @@ const demoAccounts = [
 ];
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const justSignedUp = searchParams.get("signup") === "success";
+  const prefillEmail = searchParams.get("email") ?? "";
   const [submitting, setSubmitting] = useState(false);
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: prefillEmail, password: "" },
   });
+
+  useEffect(() => {
+    if (justSignedUp) {
+      toast.success("Account created — sign in to continue");
+      if (prefillEmail) setValue("email", prefillEmail);
+    }
+  }, [justSignedUp, prefillEmail, setValue]);
 
   async function onSubmit(data: FormData) {
     setSubmitting(true);

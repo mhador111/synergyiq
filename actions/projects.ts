@@ -8,8 +8,7 @@ import { User, type Role } from "@/lib/models/user";
 import { logActivity } from "@/lib/utils/activity";
 import { auth } from "@/lib/auth/auth";
 import { hasRole } from "@/lib/auth/rbac";
-import { fail, ok, type Result } from "@/lib/utils/result";
-import {
+import { fail, ok, type Result } from "@/lib/utils/result";import { notifyUser } from "@/actions/notifications";import {
   addMemberSchema,
   projectCreateSchema,
   projectIdSchema,
@@ -214,6 +213,16 @@ export async function addProjectMember(
     actorId: me.id,
     projectId: project._id.toString(),
   });
+
+  // Notify the new member (skip if they added themselves)
+  if (parsed.data.userId !== me.id) {
+    await notifyUser({
+      userId: parsed.data.userId,
+      title: "Added to a project",
+      body: `You're now a member of "${project.name}"`,
+      link: `/projects/${project._id.toString()}`,
+    });
+  }
 
   revalidatePath(`/projects/${project._id.toString()}`);
   return ok({ projectId: project._id.toString(), userId: parsed.data.userId });

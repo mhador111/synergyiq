@@ -31,6 +31,7 @@ interface KanbanBoardProps {
   members: ProjectMember[];
   currentUserId: string;
   isOwnerOrManager: boolean;
+  onViewTask: (task: ProjectTask) => void;
   onEditTask: (task: ProjectTask) => void;
   onCreateTask: (status: TaskStatus) => void;
   onAssignTask: (task: ProjectTask) => void;
@@ -42,6 +43,7 @@ export function KanbanBoard({
   members,
   currentUserId,
   isOwnerOrManager,
+  onViewTask,
   onEditTask,
   onCreateTask,
   onAssignTask,
@@ -164,6 +166,7 @@ export function KanbanBoard({
                       assignee={assignee}
                       canEdit={canEdit}
                       isOwnerOrManager={isOwnerOrManager}
+                      onView={() => onViewTask(task)}
                       onEdit={() => onEditTask(task)}
                       onDelete={() => handleDelete(task)}
                       onAssign={() => onAssignTask(task)}
@@ -194,6 +197,7 @@ interface KanbanCardProps {
   assignee: ProjectMember | null | undefined;
   canEdit: boolean;
   isOwnerOrManager: boolean;
+  onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onAssign: () => void;
@@ -206,6 +210,7 @@ function KanbanCard({
   assignee,
   canEdit,
   isOwnerOrManager,
+  onView,
   onEdit,
   onDelete,
   onAssign,
@@ -224,7 +229,13 @@ function KanbanCard({
         <GripVertical className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <h4 className="text-sm font-medium text-foreground line-clamp-2">{task.title}</h4>
+            <button
+              type="button"
+              onClick={onView}
+              className="text-left text-sm font-medium text-foreground line-clamp-2 hover:text-primary transition-colors focus:outline-none focus-visible:underline"
+            >
+              {task.title}
+            </button>
             {canEdit && (
               <Dropdown
                 align="right"

@@ -7,6 +7,9 @@ import { loginSchema } from "@/lib/validations/auth";
 
 export const authConfig: NextAuthConfig = {
   trustHost: true,
+  // Explicit secret reference — NextAuth v5 still requires AUTH_SECRET
+  // (or NEXTAUTH_SECRET for v4) for JWT signing in the Node runtime.
+  secret: process.env.AUTH_SECRET,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [

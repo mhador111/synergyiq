@@ -110,6 +110,12 @@ html, body {
   height: 100%;
 }
 
+html {
+  /* Reserve space for the scrollbar so content doesn't shift when
+     navigating between pages that do/don't overflow. */
+  scrollbar-gutter: stable;
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));

@@ -14,26 +14,36 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
 
   const isAuthPage = pathname === "/login" || pathname === "/signup";
+  const isApiAuth = pathname.startsWith("/api/auth");
+  const isProtectedApi =
+    pathname.startsWith("/api/") && !isApiAuth;
   const isPublic =
-    pathname.startsWith("/api/auth") ||
+    isApiAuth ||
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico" ||
     pathname === "/";
-  const isDashboard =
+  const isProtectedPage =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/projects") ||
     pathname.startsWith("/tasks") ||
     pathname.startsWith("/team") ||
     pathname.startsWith("/analytics") ||
-    pathname.startsWith("/activity");
+    pathname.startsWith("/activity") ||
+    pathname.startsWith("/search") ||
+    pathname.startsWith("/notifications") ||
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/profile");
 
   if (isAuthPage && isLoggedIn) {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
+  if (isProtectedApi && !isLoggedIn) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   if (!isPublic && !isAuthPage && !isLoggedIn) {
     return NextResponse.redirect(new URL("/login", req.nextUrl));
   }
-  if (isDashboard && !isLoggedIn) {
+  if (isProtectedPage && !isLoggedIn) {
     return NextResponse.redirect(new URL("/login", req.nextUrl));
   }
   return NextResponse.next();

@@ -41,7 +41,9 @@ export default function SignupPage() {
     setSubmitting(false);
     if (result?.error) {
       toast.success("Account created — please sign in");
-      router.push("/login");
+      router.push(
+        `/login?signup=success&email=${encodeURIComponent(data.email)}`,
+      );
       return;
     }
     toast.success("Welcome to SynergyIQ!");

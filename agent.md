@@ -141,7 +141,7 @@ All models live in `lib/models/*.ts` and are exported as **bare names** (`User`,
 ### Project
 - `name: string` (≤ 80)
 - `description?: string` (≤ 2000)
-- `status: "active" | "completed" | "archived"` (default `active`)
+- `status: "active" | "completed" | "on_hold"` (default `active`)
 - `ownerId: ObjectId<User>`
 - `memberIds: ObjectId<User>[]`
 - `deadline?: Date`
@@ -273,8 +273,8 @@ npm run dev
 |---|---|---|
 | **1** | Project init, deps, models, auth, Redux, SWR, UI lib, layout shell, landing + login + signup + dashboard skeleton, seed | ✅ **DONE** (commit `06e8ffc` on `main`, verified end-to-end) |
 | **2** | Projects + Tasks core CRUD — **API route handlers** in `app/api/{projects,tasks,users}/`, SWR hooks in `hooks/useProjects.ts`, project list page, project detail page (Kanban), new-project form, DataTable primitive, activity log wired through `logActivity()`. Server actions also exist in `actions/` but UI goes through the route handlers. | ✅ **DONE** (commit `cad66dd` on `main`, on the office computer — pull `origin/main` to get it locally) |
-| **3** | Team page (invite, role change, workload), task comments, notification center, global search with debounce, analytics page (Recharts) | ⏳ next |
-| **4** | Loading/error boundaries, security headers, README, handoff docs, lint pass, Vercel deploy with Atlas | ⏳ |
+| **3** | Team page (invite, role change, workload), task comments, notification center, global search with debounce, analytics page (Recharts) | ✅ **DONE** |
+| **4** | Loading/error boundaries, security headers, README, handoff docs, lint pass, Vercel deploy with Atlas | ✅ **DONE** |
 
 ---
 
@@ -316,6 +316,14 @@ npm run dev
 | SWR | `lib/swr/{fetcher,keys}.ts`, `hooks/useProjects.ts` |
 | UI lib | `components/ui/{Button,Input,Card,Badge,DataTable,...}.tsx` + `index.ts` |
 | Layout shell | `components/layout/{Sidebar,Header,AppShell,MobileSidebar,PageHeader,Logo,ThemeToggle,AuthHydrator,ThemeApplier}.tsx` |
+| Comments | `actions/comments.ts`, `app/api/tasks/[id]/comments/route.ts` (POST list/create, DELETE by id), `app/api/comments/[id]/route.ts`, `components/projects/TaskDetailDrawer.tsx` |
+| Notifications | `actions/notifications.ts`, `app/api/notifications/route.ts` (GET list, PATCH mark-read), `components/layout/NotificationBell.tsx`, `app/(app)/notifications/page.tsx`, `hooks/useNotifications.ts` |
+| Team page | `app/(app)/team/page.tsx`, `hooks/useTeam.ts`, `app/api/users/route.ts`, `app/api/users/[id]/role/route.ts`, `actions/users.ts` (setRole) |
+| My Tasks | `app/(app)/tasks/page.tsx` (3-column "mine" view, quick-advance) |
+| Global search | `app/api/search/route.ts`, `hooks/useSearch.ts`, `app/(app)/search/page.tsx` (4 grouped result cards, debounced) |
+| Analytics | `app/api/analytics/route.ts`, `hooks/useAnalytics.ts`, `app/(app)/analytics/page.tsx` (4 Recharts charts) |
+| Loading / error / 404 | `app/loading.tsx`, `app/error.tsx`, `app/not-found.tsx`, `app/(app)/loading.tsx`, `app/(app)/error.tsx` |
+| Security headers | `next.config.ts` → `headers()` for CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy |
 
 ---
 
@@ -350,4 +358,6 @@ npm run dev          # open http://localhost:3000
 
 If `npm run dev` silently 500s on first request, you forgot to install `@tailwindcss/postcss` — re-run the gotcha list in [`skills.md` §12](./skills.md).
 
-**Next-up todo:** Projects + Tasks core CRUD (server actions + SWR hooks + Kanban board) — see `skills.md` §5 (Server State) and §9 (Server Actions) for the current ⬜ list.
+**Next-up todo:** _All planned work for the 4-day assessment is complete._ See `skills.md` for the
+final feature-by-feature status inventory. Future enhancements (out of scope): real-time websockets
+for live cursor presence, email digests, file attachments, OAuth providers.

@@ -2,18 +2,14 @@ import type { NextAuthConfig } from "next-auth";
 import type { Role } from "@/lib/auth/roles";
 
 /**
- * Edge-safe NextAuth config used by middleware.
- *
- * CRITICAL: This file MUST NOT import anything that transitively loads
- * Mongoose (e.g. `lib/db/mongoose`, `lib/models/*`, `lib/auth/auth.ts`).
- * Middleware runs on the Edge Runtime where Mongoose is not allowed.
- *
- * Keep this config minimal: only the session/JWT callbacks needed to
- * read the token in middleware. Real auth (Credentials provider, DB
- * lookups) lives in `lib/auth/auth.ts` and is only used in Node runtime.
+ * Edge-runtime-safe NextAuth config. Kept free of Mongoose / Node-only
+ * imports so the middleware bundle stays under the edge size limit.
  */
 export const authEdgeConfig: NextAuthConfig = {
   trustHost: true,
+  // Explicit secret reference — surfaces missing env at boot with a
+  // clear error instead of the generic `MissingSecret` at request time.
+  secret: process.env.AUTH_SECRET,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [],

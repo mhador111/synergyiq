@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { Home, FolderKanban, Users, Bell, BarChart3, Settings, LogOut, CheckSquare, Activity } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Home, FolderKanban, Users, Bell, BarChart3, Settings, LogOut, CheckSquare, Activity, Search } from "lucide-react";
 import { Logo } from "./Logo";
 import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils/cn";
-import { Badge } from "@/components/ui/Badge";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const items = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
@@ -15,6 +15,7 @@ const items = [
   { href: "/tasks", label: "My Tasks", icon: CheckSquare },
   { href: "/team", label: "Team", icon: Users, adminOnly: true },
   { href: "/activity", label: "Activity", icon: Activity },
+  { href: "/search", label: "Search", icon: Search },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
@@ -26,8 +27,13 @@ const footerItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { unreadCount } = useNotifications();
   const role = session?.user?.role ?? "member";
   const isAdmin = role === "admin";
+
+  function handleSignOut() {
+    signOut({ callbackUrl: "/login" });
+  }
 
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-border md:bg-surface h-screen sticky top-0">
@@ -51,7 +57,17 @@ export function Sidebar() {
             >
               <Icon className="h-4 w-4 flex-shrink-0" />
               <span className="flex-1">{item.label}</span>
-              {item.label === "Notifications" && <Badge variant="primary" className="h-5">3</Badge>}
+              {item.label === "Notifications" && unreadCount > 0 && (
+                <span
+                  className={cn(
+                    "min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-semibold flex items-center justify-center",
+                    "bg-primary text-primary-foreground",
+                  )}
+                  aria-label={`${unreadCount} unread`}
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -71,7 +87,18 @@ export function Sidebar() {
               )}
             >
               <Icon className="h-4 w-4" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.label === "Notifications" && unreadCount > 0 && (
+                <span
+                  className={cn(
+                    "min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-semibold flex items-center justify-center",
+                    "bg-primary text-primary-foreground",
+                  )}
+                  aria-label={`${unreadCount} unread`}
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -83,9 +110,15 @@ export function Sidebar() {
               <div className="text-sm font-medium text-foreground truncate">{session.user.name}</div>
               <div className="text-xs text-muted-foreground capitalize">{role}</div>
             </div>
-            <Link href="/api/auth/signout" className="text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted" title="Sign out">
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted"
+              title="Sign out"
+              aria-label="Sign out"
+            >
               <LogOut className="h-4 w-4" />
-            </Link>
+            </button>
           </div>
         )}
       </div>

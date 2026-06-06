@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 import { KanbanBoard } from "@/components/projects/KanbanBoard";
+import { TaskDetailDrawer } from "@/components/projects/TaskDetailDrawer";
 import {
   useProject,
   useUsers,
@@ -95,6 +96,7 @@ export function ProjectDetailView({
   const [creatingTask, setCreatingTask] = useState<TaskStatus | null>(null);
   const [editingTask, setEditingTask] = useState<ProjectTask | null>(null);
   const [assigningTask, setAssigningTask] = useState<ProjectTask | null>(null);
+  const [viewingTask, setViewingTask] = useState<ProjectTask | null>(null);
 
   const nonMemberUsers = useMemo(
     () =>
@@ -158,6 +160,7 @@ export function ProjectDetailView({
               members={projectData.members}
               currentUserId={currentUserId}
               isOwnerOrManager={canManage}
+              onViewTask={(t) => setViewingTask(t)}
               onEditTask={(t) => setEditingTask(t)}
               onCreateTask={(s) => setCreatingTask(s)}
               onAssignTask={(t) => setAssigningTask(t)}
@@ -305,6 +308,21 @@ export function ProjectDetailView({
           }}
         />
       )}
+
+      <TaskDetailDrawer
+        task={viewingTask}
+        members={projectData.members}
+        onClose={() => setViewingTask(null)}
+        onEdit={(t) => {
+          setViewingTask(null);
+          setEditingTask(t);
+        }}
+        onAssign={(t) => {
+          setViewingTask(null);
+          setAssigningTask(t);
+        }}
+        canManageMembers={canManage}
+      />
     </div>
   );
 }

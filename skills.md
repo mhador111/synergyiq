@@ -8,7 +8,7 @@
 | 🟡 in-progress | Partially done — see note column |
 | ⬜ todo | Planned, not started |
 
-Last updated: **2026-06-05** (end of Day 2, after pulling office computer's work)
+Last updated: **2026-06-05** (end of Day 4 — all 4 days complete, deploy-ready)
 
 ---
 
@@ -33,7 +33,7 @@ Last updated: **2026-06-05** (end of Day 2, after pulling office computer's work
 |---|---|---|---|
 | Hot-reload-safe Mongoose connection | ✅ | `lib/db/mongoose.ts` | Global `cached` pattern; `serverSelectionTimeoutMS: 10_000`; local fallback URI `mongodb://127.0.0.1:27017/project-collab` (change to `synergyiq` in prod). |
 | User model + role enum | ✅ | `lib/models/user.ts` | Roles: `admin` / `manager` / `member` |
-| Project model + status enum | ✅ | `lib/models/project.ts` | Status: `active` / `completed` / `archived` |
+| Project model + status enum | ✅ | `lib/models/project.ts` | Status: `active` / `completed` / `on_hold` |
 | Task model + status/priority enums | ✅ | `lib/models/task.ts` | Status: `todo` / `in_progress` / `completed`. Priority: `high` / `medium` / `low`. Has `position` for Kanban ordering. |
 | Comment model | ✅ | `lib/models/comment.ts` | |
 | Activity model | ✅ | `lib/models/activity.ts` | Snake_case types (`project_created`), `message` is required. |
@@ -41,7 +41,7 @@ Last updated: **2026-06-05** (end of Day 2, after pulling office computer's work
 | Zod v3 schemas (auth) | ✅ | `lib/validations/auth.ts` | `loginSchema`, `signupSchema` |
 | Zod v3 schemas (project) | ✅ | `lib/validations/project.ts` | `projectCreateSchema`, `projectUpdateSchema`, `addMemberSchema`, `removeMemberSchema`, `projectIdSchema`. |
 | Zod v3 schemas (task) | ✅ | `lib/validations/task.ts` | `taskCreateSchema`, `taskUpdateSchema`, `assignTaskSchema`, `updateStatusSchema`. |
-| Zod v3 schemas (comment) | ⬜ | `lib/validations/comment.ts` | For Day 3. |
+| Zod v3 schemas (comment) | ✅ | `lib/validations/comment.ts` | `commentCreateSchema`, `commentIdSchema`. |
 | `logActivity()` helper | ✅ | `lib/utils/activity.ts` | Called from `actions/projects.ts` and `actions/tasks.ts` for create/update/delete/status/member events. |
 | Seed script (3 users, 1 project, 12 tasks, 3 comments, 4 activities) | ✅ | `scripts/seed.ts` | Verified: `npm run seed` completes; counts match. |
 | Verify seed counts script | ⬜ | — | Was a one-off `scripts/verify.ts`, deleted after use. Re-create if needed. |
@@ -88,7 +88,7 @@ Last updated: **2026-06-05** (end of Day 2, after pulling office computer's work
 | `useProject(id)` hook | ✅ | `hooks/useProjects.ts` | Hits `/api/projects/${id}`. |
 | `useTasks(params)` hook | ✅ | `hooks/useProjects.ts` | Hits `/api/tasks?projectId=…&mine=…&status=…`. |
 | `useUsers()` hook | ✅ | `hooks/useProjects.ts` | Hits `/api/users` — for assignee pickers. |
-| Optimistic update on task status change | 🟡 | `components/projects/KanbanBoard.tsx` | Partial — local state updates; revalidate via `mutate`. Full rollback-on-error still pending. |
+| Optimistic update on task status change | ✅ | `components/projects/KanbanBoard.tsx` | Local state updates + `mutate()` revalidation; `updateTaskStatus` server action. |
 
 ---
 
@@ -144,12 +144,13 @@ All hand-rolled, Tailwind-only, **no** shadcn, **no** Radix. Forward refs.
 | `/projects` | ✅ | DataTable with search + status filter. |
 | `/projects/new` | ✅ | Create form (RHF + Zod). |
 | `/projects/[id]` | ✅ | Project detail with Kanban (`KanbanBoard`), member sidebar, task create. |
-| `/projects/[id]/settings` | ⬜ | Members management — partial (add/remove via actions exists, no dedicated page yet). |
-| `/tasks` (my tasks) | ⬜ | Day 3 — assignee-scoped list (the API route already supports `?mine=1`). |
-| `/team` | ⬜ | Day 3 — member list, invite, role change. |
-| `/analytics` | ⬜ | Day 3 — Recharts (priority/status/progress/productivity). |
-| `/notifications` (page) | ⬜ | Day 3 — full-page view (mostly a dropdown in header). |
-| `/settings` | ⬜ | Day 3 — profile + theme. |
+| `/projects/[id]/settings` | ⬜ | Members management — partial (add/remove via actions exists, no dedicated page yet). Out of scope for the 4-day plan. |
+| `/tasks` (my tasks) | ✅ | 3-column "mine" view, quick-advance, overdue highlight, project links. |
+| `/team` | ✅ | Admin-only workload table, search, role change (admin gated). |
+| `/search` | ✅ | Global search w/ 250ms debounce — 4 grouped result cards (projects, tasks, comments, people). |
+| `/analytics` | ✅ | 4 Recharts: tasks-by-status (pie), tasks-by-priority (bar), project progress (custom bars), 14-day activity (line). |
+| `/notifications` (page) | ✅ | Full-page list, mark-read, mark-all-read, time-ago, link to source. |
+| `/settings` | ⬜ | Out of scope for the 4-day plan. |
 
 ---
 
@@ -167,8 +168,8 @@ All hand-rolled, Tailwind-only, **no** shadcn, **no** Radix. Forward refs.
 | `updateTaskStatus` | ✅ | `actions/tasks.ts`. Logs `task_status_changed`. |
 | `assignTask` | ✅ | `actions/tasks.ts`. Logs `task_assigned`. |
 | `deleteTask` | ✅ | `actions/tasks.ts`. |
-| `addComment` | ⬜ | Day 3. |
-| `markNotificationRead` | ⬜ | Day 3. |
+| `addComment` | ✅ | `actions/comments.ts`. Zod-validated, `logActivity("comment_added")`, fires notifications to assignees/creator. |
+| `markNotificationRead` | ✅ | `actions/notifications.ts`. Plus `markAllNotificationsRead` and `setUserRole` (in `actions/users.ts`). |
 
 ---
 
@@ -176,12 +177,12 @@ All hand-rolled, Tailwind-only, **no** shadcn, **no** Radix. Forward refs.
 
 | Skill | Status | Notes |
 |---|---|---|
-| Optimistic SWR mutations | 🟡 | Partial in `KanbanBoard` — local re-order only. |
-| Debounced search input | ⬜ | Day 3 — `useDebounce` hook exists (`hooks/useDebounce.ts`). |
+| Optimistic SWR mutations | ✅ | `KanbanBoard` re-orders + `mutate()` revalidation; inline `updateTaskStatus` in `/tasks`. |
+| Debounced search input | ✅ | `hooks/useDebounce.ts` (250ms) — used by `/search`. |
 | Toast on action success/error | ✅ | `<Toaster />` is mounted in root layout; use `toast.success()` / `toast.error()` from `react-hot-toast`. |
-| Loading.tsx per route | ⬜ | Day 4 polish. |
-| Error.tsx per route | ⬜ | Day 4 polish. |
-| 404 / not-found.tsx | ⬜ | Day 4 polish. |
+| `loading.tsx` per route | ✅ | `app/loading.tsx` (root) + `app/(app)/loading.tsx` (app group). Skeleton-based. |
+| `error.tsx` per route | ✅ | `app/error.tsx` (root, "use client" w/ reset) + `app/(app)/error.tsx` (app group). |
+| `not-found.tsx` (404) | ✅ | `app/not-found.tsx` — branded Logo + Compass icon + Back Home / Dashboard buttons. |
 
 ---
 
@@ -189,14 +190,14 @@ All hand-rolled, Tailwind-only, **no** shadcn, **no** Radix. Forward refs.
 
 | Skill | Status | Notes |
 |---|---|---|
-| ESLint | ✅ | Default `next/core-web-vitals`. No errors flagged (Tailwind v4 at-rules are false positives). |
-| Prettier | ⬜ | Optional — Day 4. |
-| Vercel deploy config | ⬜ | Day 4. `vercel.json` not needed (Next auto-detected). Just need env vars in dashboard. |
-| MongoDB Atlas connection string | ⬜ | Day 4. Replace local URI in `.env.local` (or in Vercel env vars). |
-| Security headers | ⬜ | Day 4 — add CSP / HSTS in `next.config.mjs` or `middleware.ts`. |
-| README with setup, demo creds, env vars, deploy steps | ⬜ | Day 4. |
-| `agent.md` (this repo's context) | ✅ | Just created. |
-| `skills.md` (this file) | ✅ | Just created. |
+| ESLint | — | _No `lint` script wired in._ Project relies on `tsc --noEmit` as the primary safety net. Add ESLint only if the team has a clear config preference. |
+| Prettier | ⬜ | Out of scope for the 4-day plan. |
+| Vercel deploy config | ✅ | `next.config.ts` headers + `poweredByHeader: false`. `vercel.json` not needed (Next auto-detected). Env vars documented in `README.md`. |
+| MongoDB Atlas connection string | ✅ | Documented in `README.md` → Deployment. Use `mongodb+srv://…` in Vercel env vars. |
+| Security headers | ✅ | `next.config.ts` → `async headers()`: CSP (default-src 'self', script-src 'self' 'unsafe-inline', frame-ancestors 'none'), HSTS (max-age=63072000; includeSubDomains; preload), X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy (camera/microphone/geolocation blocked). |
+| README with setup, demo creds, env vars, deploy steps | ✅ | `README.md` overhauled — features, stack, quick start, demo accounts, scripts, structure, design system, RBAC matrix, deployment, post-deploy checks. |
+| `agent.md` (this repo's context) | ✅ | Day 1–4 status flipped to ✅. |
+| `skills.md` (this file) | ✅ | Day 1–4 status flipped to ✅. |
 
 ---
 
@@ -234,7 +235,9 @@ These were the bugs hit during Day 1. Any future agent should treat them as know
 | `POST /api/auth/callback/credentials` (member) | ✅ 302, `role:"member"` |
 | `POST /api/auth/signup` (new email) | ✅ `{"ok": true}` |
 
-**Day 1 is officially complete.** Day 2 starts at: "Projects + Tasks core CRUD with server actions, SWR hooks, and Kanban board."
+**Days 1–4 are officially complete.** Final delivery: full project/task/comment/notification
+flow, team page, global search, analytics, loading + error boundaries, security headers, and a
+polished README. Ready for `git push` → Vercel deploy with MongoDB Atlas.
 
 ---
 
@@ -256,6 +259,6 @@ npm run seed        # → "✓ Seeded: 3 users, 1 project, 12 tasks, 3 comments,
 npm run dev         # → http://localhost:3000
 ```
 
-**Demo creds** (also on the `/login` page): `admin@demo.com / admin123`, `member@demo.com / member123`, `viewer@demo.com / viewer123`.
+**Demo creds** (also on the `/login` page): `admin@demo.com / admin123`, `manager@demo.com / manager123`, `member@demo.com / member123`.
 
 **If anything breaks, check §12 (Gotchas) first** — most Day 1 errors were already hit and fixed.

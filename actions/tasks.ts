@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Project, type ProjectDoc } from "@/lib/models/project";
 import { Task, TASK_STATUSES } from "@/lib/models/task";
 import { User, type Role } from "@/lib/models/user";
+import { Comment } from "@/lib/models/comment";
 import { logActivity } from "@/lib/utils/activity";
 import { auth } from "@/lib/auth/auth";
 import { hasRole } from "@/lib/auth/rbac";
@@ -20,6 +21,11 @@ import {
   type TaskStatusInput,
   type TaskUpdateInput,
 } from "@/lib/validations/task";
+import {
+  commentCreateSchema,
+  type CommentCreateInput,
+} from "@/lib/validations/comment";
+import { notifyMany, notifyUser } from "@/actions/notifications";
 
 type AccessResult =
   | { ok: true; project: ProjectDoc; isOwner: boolean }
@@ -248,6 +254,19 @@ export async function assignTask(
     taskId: task._id.toString(),
   });
 
+  // Notify the new assignee (skip if the actor assigned it to themselves)
+  if (
+    parsed.data.assigneeId &&
+    String(parsed.data.assigneeId) !== String(me.id)
+  ) {
+    await notifyUser({
+      userId: parsed.data.assigneeId,
+      title: "Task assigned to you",
+      body: `"${task.title}"`,
+      link: `/projects/${task.projectId.toString()}?taskId=${task._id.toString()}`,
+    });
+  }
+
   revalidatePath(`/projects/${task.projectId.toString()}`);
   revalidatePath("/tasks");
   return ok({ id: task._id.toString() });
@@ -291,4 +310,60 @@ export async function deleteTask(
   revalidatePath(`/projects/${projectId}`);
   revalidatePath("/tasks");
   return ok({ id: parsed.data.id });
+}
+
+export async function addComment(
+  input: CommentCreateInput,
+): Promise<Result<{ id: string }>> {
+  const me = await requireUser();
+  if (!me) return fail("You must be signed in.");
+
+  const parsed = commentCreateSchema.safeParse(input);
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Invalid input");
+  }
+  const { taskId, body } = parsed.data;
+
+  await connectDB();
+
+  const task = await Task.findById(taskId)
+    .select("projectId title assigneeId createdBy")
+    .lean();
+  if (!task) return fail("Task not found");
+
+  const access = await loadProjectForMember(
+    task.projectId.toString(),
+    me.id,
+    me.role,
+  );
+  if (!access.ok) return fail(access.error);
+
+  const comment = await Comment.create({
+    taskId,
+    authorId: me.id,
+    body,
+  });
+
+  await logActivity({
+    type: "comment_added",
+    message: `Commented on "${task.title}"`,
+    actorId: me.id,
+    projectId: task.projectId.toString(),
+    taskId,
+  });
+
+  // Notify task assignee + creator (skip the actor)
+  const targets: Array<string | null | undefined> = [
+    task.assigneeId ? String(task.assigneeId) : null,
+    task.createdBy ? String(task.createdBy) : null,
+  ];
+  await notifyMany({
+    userIds: targets,
+    title: "New comment on task",
+    body: `"${task.title}"`,
+    link: `/projects/${task.projectId.toString()}?taskId=${taskId}`,
+  });
+
+  revalidatePath(`/projects/${task.projectId.toString()}`);
+  return ok({ id: comment._id.toString() });
 }
