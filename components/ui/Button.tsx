@@ -35,12 +35,13 @@ const sizes: Record<Size, string> = {
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant = "primary", size = "md", isLoading, leftIcon, rightIcon, children, disabled, ...props },
+  { className, variant = "primary", size = "md", type = "button", isLoading, leftIcon, rightIcon, children, disabled, ...props },
   ref,
 ) {
   return (
     <button
       ref={ref}
+      type={type}
       disabled={disabled || isLoading}
       className={cn(base, variants[variant], sizes[size], className)}
       {...props}

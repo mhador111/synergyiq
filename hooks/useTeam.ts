@@ -4,7 +4,7 @@ import useSWR, { mutate } from "swr";
 import { useCallback } from "react";
 import toast from "react-hot-toast";
 import { fetcher } from "@/lib/swr/fetcher";
-import type { Role } from "@/lib/models/user";
+import type { Role } from "@/lib/auth/roles";
 
 export interface TeamMember {
   id: string;

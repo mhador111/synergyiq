@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useTasks, useProjects, type ProjectTask } from "@/hooks/useProjects";
 import { updateTaskStatus } from "@/actions/tasks";
-import { TASK_STATUSES, type TaskStatus } from "@/lib/models/task";
+import { TASK_STATUSES, type TaskStatus } from "@/lib/auth/roles";
 import { isOverdue, isUpcoming, formatDate } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import toast from "react-hot-toast";

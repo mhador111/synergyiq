@@ -31,7 +31,6 @@ export default auth((req) => {
     pathname.startsWith("/activity") ||
     pathname.startsWith("/search") ||
     pathname.startsWith("/notifications") ||
-    pathname.startsWith("/settings") ||
     pathname.startsWith("/profile");
 
   if (isAuthPage && isLoggedIn) {

@@ -585,35 +585,39 @@ function TaskFormModal({
     }
     setSaving(true);
 
-    const res =
-      mode === "create"
-        ? await createTask({
-            projectId,
-            title: title.trim(),
-            description: description.trim(),
-            status,
-            priority,
-            dueDate: new Date(dueDate),
-            assigneeId: assigneeId || null,
-          })
-        : await updateTask({
-            id: task!.id,
-            title: title.trim(),
-            description: description.trim(),
-            status,
-            priority,
-            dueDate: new Date(dueDate),
-            assigneeId: assigneeId || undefined,
-          });
+    try {
+      const res =
+        mode === "create"
+          ? await createTask({
+              projectId,
+              title: title.trim(),
+              description: description.trim(),
+              status,
+              priority,
+              dueDate: new Date(dueDate),
+              assigneeId: assigneeId || null,
+            })
+          : await updateTask({
+              id: task!.id,
+              title: title.trim(),
+              description: description.trim(),
+              status,
+              priority,
+              dueDate: new Date(dueDate),
+              assigneeId: assigneeId || undefined,
+            });
 
-    setSaving(false);
-
-    if (!res.ok) {
-      toast.error(res.error);
-      return;
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      toast.success(mode === "create" ? "Task created" : "Task updated");
+      await onSaved();
+    } catch {
+      toast.error("Could not save task");
+    } finally {
+      setSaving(false);
     }
-    toast.success(mode === "create" ? "Task created" : "Task updated");
-    await onSaved();
   }
 
   return (

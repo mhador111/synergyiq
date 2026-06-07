@@ -1,9 +1,7 @@
 import mongoose, { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
+import { TASK_PRIORITIES, TASK_STATUSES } from "@/lib/auth/roles";
 
-export const PRIORITIES = ["high", "medium", "low"] as const;
-export const TASK_STATUSES = ["todo", "in_progress", "completed"] as const;
-export type Priority = (typeof PRIORITIES)[number];
-export type TaskStatus = (typeof TASK_STATUSES)[number];
+export type { TaskPriority as Priority, TaskStatus } from "@/lib/auth/roles";
 
 const taskSchema = new Schema(
   {
@@ -12,7 +10,7 @@ const taskSchema = new Schema(
     projectId: { type: Schema.Types.ObjectId, ref: "Project", required: true, index: true },
     assigneeId: { type: Schema.Types.ObjectId, ref: "User", default: null, index: true },
     dueDate: { type: Date, required: true, index: true },
-    priority: { type: String, enum: PRIORITIES, default: "medium", index: true },
+    priority: { type: String, enum: TASK_PRIORITIES, default: "medium", index: true },
     status: { type: String, enum: TASK_STATUSES, default: "todo", index: true },
     position: { type: Number, default: 0, index: true },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },

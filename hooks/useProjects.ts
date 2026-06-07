@@ -2,8 +2,7 @@
 
 import useSWR, { mutate } from "swr";
 import { fetcher } from "@/lib/swr/fetcher";
-import type { ProjectStatus } from "@/lib/models/project";
-import type { TaskStatus, Priority as TaskPriority } from "@/lib/models/task";
+import type { ProjectStatus, TaskPriority, TaskStatus } from "@/lib/auth/roles";
 
 export interface ProjectListItem {
   id: string;

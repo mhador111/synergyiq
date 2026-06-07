@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, type MouseEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
@@ -38,7 +38,7 @@ function LoginForm() {
   const justSignedUp = searchParams.get("signup") === "success";
   const prefillEmail = searchParams.get("email") ?? "";
   const [submitting, setSubmitting] = useState(false);
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
+  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { email: prefillEmail, password: "" },
   });
@@ -46,9 +46,9 @@ function LoginForm() {
   useEffect(() => {
     if (justSignedUp) {
       toast.success("Account created — sign in to continue");
-      if (prefillEmail) setValue("email", prefillEmail);
+      if (prefillEmail) reset({ email: prefillEmail, password: "" });
     }
-  }, [justSignedUp, prefillEmail, setValue]);
+  }, [justSignedUp, prefillEmail, reset]);
 
   async function onSubmit(data: FormData) {
     setSubmitting(true);
@@ -63,9 +63,10 @@ function LoginForm() {
     router.refresh();
   }
 
-  function fillDemo(d: { email: string; password: string }) {
-    setValue("email", d.email);
-    setValue("password", d.password);
+  function fillDemo(event: MouseEvent<HTMLButtonElement>, d: { email: string; password: string }) {
+    event.preventDefault();
+    event.stopPropagation();
+    reset({ email: d.email, password: d.password }, { keepErrors: false });
   }
 
   return (
@@ -75,22 +76,34 @@ function LoginForm() {
         <p className="mt-1 text-sm text-muted-foreground">Sign in to your account to continue</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <Input
-          label="Email"
-          type="email"
-          autoComplete="email"
-          leftIcon={<Mail className="h-4 w-4" />}
-          error={errors.email?.message}
-          {...register("email")}
+      <form method="post" noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <Controller
+          name="email"
+          control={control}
+          render={({ field }) => (
+            <Input
+              label="Email"
+              type="email"
+              autoComplete="email"
+              leftIcon={<Mail className="h-4 w-4" />}
+              error={errors.email?.message}
+              {...field}
+            />
+          )}
         />
-        <Input
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          leftIcon={<Lock className="h-4 w-4" />}
-          error={errors.password?.message}
-          {...register("password")}
+        <Controller
+          name="password"
+          control={control}
+          render={({ field }) => (
+            <Input
+              label="Password"
+              type="password"
+              autoComplete="current-password"
+              leftIcon={<Lock className="h-4 w-4" />}
+              error={errors.password?.message}
+              {...field}
+            />
+          )}
         />
         <Button type="submit" size="lg" className="w-full" isLoading={submitting} leftIcon={<LogIn className="h-4 w-4" />}>
           Sign in
@@ -105,7 +118,7 @@ function LoginForm() {
         </div>
         <div className="grid grid-cols-3 gap-2">
           {demoAccounts.map((d) => (
-            <Button key={d.email} type="button" variant="outline" size="sm" onClick={() => fillDemo(d)}>
+            <Button key={d.email} type="button" variant="outline" size="sm" onClick={(event) => fillDemo(event, d)}>
               {d.label}
             </Button>
           ))}

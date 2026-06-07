@@ -1,7 +1,7 @@
 import mongoose, { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
+import { PROJECT_STATUSES } from "@/lib/auth/roles";
 
-export const PROJECT_STATUSES = ["active", "completed", "on_hold"] as const;
-export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
+export type { ProjectStatus } from "@/lib/auth/roles";
 
 const projectSchema = new Schema(
   {

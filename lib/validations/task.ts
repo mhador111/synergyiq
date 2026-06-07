@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PRIORITIES, TASK_STATUSES } from "@/lib/models/task";
+import { TASK_PRIORITIES, TASK_STATUSES } from "@/lib/auth/roles";
 
 const futureDate = z
   .coerce
@@ -16,7 +16,7 @@ export const taskCreateSchema = z.object({
   description: z.string().trim().max(4000).default(""),
   assigneeId: z.string().nullable().optional().default(null),
   dueDate: futureDate,
-  priority: z.enum(PRIORITIES).default("medium"),
+  priority: z.enum(TASK_PRIORITIES).default("medium"),
   status: z.enum(TASK_STATUSES).default("todo"),
 });
 
@@ -26,7 +26,7 @@ export const taskUpdateSchema = z.object({
   description: z.string().trim().max(4000).optional(),
   assigneeId: z.string().nullable().optional(),
   dueDate: futureDate.optional(),
-  priority: z.enum(PRIORITIES).optional(),
+  priority: z.enum(TASK_PRIORITIES).optional(),
   status: z.enum(TASK_STATUSES).optional(),
 });
 

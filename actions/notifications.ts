@@ -59,10 +59,11 @@ export async function notifyMany(input: {
   title: string;
   body: string;
   link?: string | null;
+  excludeUserId?: string | null;
 }): Promise<void> {
   const seen = new Set<string>();
   for (const id of input.userIds) {
-    if (!id || seen.has(id)) continue;
+    if (!id || id === input.excludeUserId || seen.has(id)) continue;
     seen.add(id);
     await notifyUser({
       userId: id,

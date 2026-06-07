@@ -3,11 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { connectDB } from "@/lib/db/mongoose";
 import { Project, type ProjectDoc } from "@/lib/models/project";
-import { Task, TASK_STATUSES } from "@/lib/models/task";
-import { User, type Role } from "@/lib/models/user";
+import { Task } from "@/lib/models/task";
+import { User } from "@/lib/models/user";
 import { Comment } from "@/lib/models/comment";
 import { logActivity } from "@/lib/utils/activity";
 import { auth } from "@/lib/auth/auth";
+import { TASK_STATUSES, type Role } from "@/lib/auth/roles";
 import { hasRole } from "@/lib/auth/rbac";
 import { ok, fail, type Result } from "@/lib/utils/result";
 import {
@@ -71,6 +72,20 @@ async function nextPosition(projectId: string, status: string) {
   return ((last as { position?: number } | null)?.position ?? -1) + 1;
 }
 
+function isDuplicateTaskTitleError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === 11000 &&
+    "keyPattern" in error &&
+    typeof error.keyPattern === "object" &&
+    error.keyPattern !== null &&
+    "projectId" in error.keyPattern &&
+    "title" in error.keyPattern
+  );
+}
+
 export async function createTask(
   input: TaskCreateInput,
 ): Promise<Result<{ id: string }>> {
@@ -96,17 +111,25 @@ export async function createTask(
 
   const position = await nextPosition(data.projectId, data.status);
 
-  const task = await Task.create({
-    title: data.title,
-    description: data.description ?? "",
-    projectId: data.projectId,
-    assigneeId: data.assigneeId ?? null,
-    dueDate: data.dueDate,
-    priority: data.priority,
-    status: data.status,
-    position,
-    createdBy: me.id,
-  });
+  let task;
+  try {
+    task = await Task.create({
+      title: data.title,
+      description: data.description ?? "",
+      projectId: data.projectId,
+      assigneeId: data.assigneeId ?? null,
+      dueDate: data.dueDate,
+      priority: data.priority,
+      status: data.status,
+      position,
+      createdBy: me.id,
+    });
+  } catch (error) {
+    if (isDuplicateTaskTitleError(error)) {
+      return fail("A task with this title already exists in this project.");
+    }
+    throw error;
+  }
 
   await logActivity({
     type: "task_created",
@@ -115,6 +138,15 @@ export async function createTask(
     projectId: data.projectId,
     taskId: task._id.toString(),
   });
+
+  if (data.assigneeId && String(data.assigneeId) !== String(me.id)) {
+    await notifyUser({
+      userId: data.assigneeId,
+      title: "Task assigned to you",
+      body: `"${task.title}"`,
+      link: `/projects/${data.projectId}?taskId=${task._id.toString()}`,
+    });
+  }
 
   revalidatePath(`/projects/${data.projectId}`);
   revalidatePath("/tasks");
@@ -160,7 +192,14 @@ export async function updateTask(
   if (data.priority !== undefined) task.priority = data.priority;
   if (data.status !== undefined) task.status = data.status;
 
-  await task.save();
+  try {
+    await task.save();
+  } catch (error) {
+    if (isDuplicateTaskTitleError(error)) {
+      return fail("A task with this title already exists in this project.");
+    }
+    throw error;
+  }
 
   await logActivity({
     type: "task_updated",
@@ -362,6 +401,7 @@ export async function addComment(
     title: "New comment on task",
     body: `"${task.title}"`,
     link: `/projects/${task.projectId.toString()}?taskId=${taskId}`,
+    excludeUserId: me.id,
   });
 
   revalidatePath(`/projects/${task.projectId.toString()}`);

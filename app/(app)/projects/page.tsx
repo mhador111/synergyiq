@@ -11,8 +11,7 @@ import { DataTable, type Column } from "@/components/ui/DataTable";
 import { Dropdown, DropdownItem, DropdownSeparator } from "@/components/ui/Dropdown";
 import { useProjects, type ProjectListItem } from "@/hooks/useProjects";
 import { deleteProject } from "@/actions/projects";
-import { PROJECT_STATUSES } from "@/lib/models/project";
-import type { ProjectStatus } from "@/lib/models/project";
+import { PROJECT_STATUSES, type ProjectStatus } from "@/lib/auth/roles";
 import toast from "react-hot-toast";
 
 const statusVariant: Record<ProjectStatus, "primary" | "success" | "warning"> = {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ROLES } from "@/lib/models/user";
+import { ROLES } from "@/lib/auth/roles";
 
 export const signupSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(80),

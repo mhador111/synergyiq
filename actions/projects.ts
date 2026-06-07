@@ -2,11 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { connectDB } from "@/lib/db/mongoose";
-import { Project, PROJECT_STATUSES } from "@/lib/models/project";
+import { Project } from "@/lib/models/project";
 import { Task } from "@/lib/models/task";
-import { User, type Role } from "@/lib/models/user";
+import { User } from "@/lib/models/user";
 import { logActivity } from "@/lib/utils/activity";
 import { auth } from "@/lib/auth/auth";
+import { PROJECT_STATUSES, type Role } from "@/lib/auth/roles";
 import { hasRole } from "@/lib/auth/rbac";
 import { fail, ok, type Result } from "@/lib/utils/result";import { notifyUser } from "@/actions/notifications";import {
   addMemberSchema,

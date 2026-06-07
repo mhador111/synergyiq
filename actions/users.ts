@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/db/mongoose";
-import { User, ROLES, type Role } from "@/lib/models/user";
+import { User } from "@/lib/models/user";
 import { auth } from "@/lib/auth/auth";
+import { ROLES, type Role } from "@/lib/auth/roles";
 import { hasRole } from "@/lib/auth/rbac";
 import { logActivity } from "@/lib/utils/activity";
 import { ok, fail, type Result } from "@/lib/utils/result";

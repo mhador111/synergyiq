@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PROJECT_STATUSES } from "@/lib/models/project";
+import { PROJECT_STATUSES } from "@/lib/auth/roles";
 
 const dateInFuture = (msg = "Please select a valid deadline") =>
   z

@@ -9,6 +9,9 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/db/mongoose";
 import { Project } from "@/lib/models/project";
 import { Task } from "@/lib/models/task";
+import { Activity } from "@/lib/models/activity";
+import { User } from "@/lib/models/user";
+import { timeAgo } from "@/lib/utils/format";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -42,6 +45,26 @@ export default async function DashboardPage() {
     status: "active" | "completed" | "on_hold";
     deadline?: Date;
   }>;
+
+  const accessibleProjectIds = await Project.find({
+    $or: [{ ownerId: userId }, { memberIds: userId }],
+  })
+    .select("_id")
+    .lean();
+  const recentActivities = await Activity.find({
+    $or: [
+      { projectId: { $in: accessibleProjectIds.map((p) => p._id) } },
+      { actorId: userId },
+    ],
+  })
+    .sort({ createdAt: -1 })
+    .limit(5)
+    .lean();
+  const activityActors = await User.find(
+    { _id: { $in: Array.from(new Set(recentActivities.map((a) => a.actorId.toString()))) } },
+    { name: 1 },
+  ).lean();
+  const actorNameById = new Map(activityActors.map((u) => [u._id.toString(), u.name]));
 
   return (
     <div className="space-y-8">
@@ -88,11 +111,28 @@ export default async function DashboardPage() {
         </Card>
 
         <Card>
-          <div className="px-5 pt-5 pb-3">
+          <div className="px-5 pt-5 pb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold">Activity</h2>
+            <Link href="/activity" className="text-xs text-primary hover:underline">View all</Link>
           </div>
           <div className="px-5 pb-5 space-y-3 text-sm">
-            <p className="text-muted-foreground text-center py-6">No recent activity yet.</p>
+            {recentActivities.length === 0 ? (
+              <p className="text-muted-foreground text-center py-6">No recent activity yet.</p>
+            ) : (
+              recentActivities.map((a) => (
+                <Link
+                  key={a._id.toString()}
+                  href={a.projectId ? `/projects/${a.projectId.toString()}${a.taskId ? `?taskId=${a.taskId.toString()}` : ""}` : "/activity"}
+                  className="block rounded-lg p-2 hover:bg-muted transition-colors"
+                >
+                  <p className="text-foreground line-clamp-2">
+                    <span className="font-medium">{actorNameById.get(a.actorId.toString()) ?? "Someone"}</span>{" "}
+                    {a.message}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{timeAgo(a.createdAt)}</p>
+                </Link>
+              ))
+            )}
           </div>
         </Card>
       </div>

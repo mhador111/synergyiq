@@ -21,7 +21,6 @@ const items = [
 
 const footerItems = [
   { href: "/notifications", label: "Notifications", icon: Bell },
-  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar() {

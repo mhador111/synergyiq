@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const MONGODB_URI =
-  process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/project-collab";
+  process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/synergyiq";
 
 type GlobalWithMongoose = typeof globalThis & {
   _mongoose?: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null };

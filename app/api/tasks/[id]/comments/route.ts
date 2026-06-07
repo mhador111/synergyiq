@@ -8,6 +8,7 @@ import { Comment } from "@/lib/models/comment";
 import { User } from "@/lib/models/user";
 import { logActivity } from "@/lib/utils/activity";
 import { commentCreateSchema } from "@/lib/validations/comment";
+import { notifyMany } from "@/actions/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,9 @@ export async function GET(_req: Request, ctx: RouteContext) {
   await connectDB();
   const me = new mongoose.Types.ObjectId(session.user.id);
 
-  const task = await Task.findById(taskId).select("projectId title").lean();
+  const task = await Task.findById(taskId)
+    .select("projectId title assigneeId createdBy")
+    .lean();
   if (!task) return notFound("Task not found");
 
   const project = await Project.findById(task.projectId).lean();
@@ -95,7 +98,9 @@ export async function POST(req: Request, ctx: RouteContext) {
   await connectDB();
   const me = new mongoose.Types.ObjectId(session.user.id);
 
-  const task = await Task.findById(taskId).select("projectId title").lean();
+  const task = await Task.findById(taskId)
+    .select("projectId title assigneeId createdBy")
+    .lean();
   if (!task) return notFound("Task not found");
 
   const project = await Project.findById(task.projectId).lean();
@@ -118,6 +123,17 @@ export async function POST(req: Request, ctx: RouteContext) {
     actorId: me.toString(),
     projectId: task.projectId.toString(),
     taskId,
+  });
+
+  await notifyMany({
+    userIds: [
+      task.assigneeId ? String(task.assigneeId) : null,
+      task.createdBy ? String(task.createdBy) : null,
+    ],
+    title: "New comment on task",
+    body: `"${task.title}"`,
+    link: `/projects/${task.projectId.toString()}?taskId=${taskId}`,
+    excludeUserId: me.toString(),
   });
 
   const author = await User.findById(me, { name: 1, avatarColor: 1 }).lean();

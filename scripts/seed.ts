@@ -1,5 +1,11 @@
 /* eslint-disable no-console */
-import "dotenv/config";
+// Load .env.local first (what the Next.js app uses), then fall back to .env.
+// `dotenv/config` alone only loads .env, which means running this script
+// outside Next would target a different DB than the running app.
+import { config as loadEnv } from "dotenv";
+loadEnv({ path: ".env.local" });
+loadEnv({ path: ".env" });
+
 import mongoose from "mongoose";
 import { connectDB } from "../lib/db/mongoose";
 import { User } from "../lib/models/user";

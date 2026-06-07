@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Calendar, Flag, GripVertical, MoreVertical, Pencil, Trash2, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
 import { mutate } from "swr";
-import { TASK_STATUSES, type TaskStatus } from "@/lib/models/task";
+import { TASK_STATUSES, type TaskStatus } from "@/lib/auth/roles";
 import { updateTaskStatus, deleteTask } from "@/actions/tasks";
 import type { ProjectTask, ProjectMember } from "@/hooks/useProjects";
 import { Avatar } from "@/components/ui/Avatar";

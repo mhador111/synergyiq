@@ -212,7 +212,3 @@ skills.md                  ⭐ Feature-by-feature status inventory
   `Content-Security-Policy` headers are present on responses.
 
 ---
-
-## License
-
-Internal — EAP 4.0 assessment submission.

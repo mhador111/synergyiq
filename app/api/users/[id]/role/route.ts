@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { changeUserRole } from "@/actions/users";
-import type { Role } from "@/lib/models/user";
+import type { Role } from "@/lib/auth/roles";
 
 export const dynamic = "force-dynamic";
 

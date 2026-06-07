@@ -2,7 +2,8 @@ import NextAuth, { type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db/mongoose";
-import { User, type Role } from "@/lib/models/user";
+import { User } from "@/lib/models/user";
+import type { Role } from "@/lib/auth/roles";
 import { loginSchema } from "@/lib/validations/auth";
 
 export const authConfig: NextAuthConfig = {

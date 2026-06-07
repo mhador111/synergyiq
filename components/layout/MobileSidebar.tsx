@@ -21,7 +21,6 @@ const items = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/notifications", label: "Notifications", icon: Bell, badge: true },
-  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function MobileSidebar() {

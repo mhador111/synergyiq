@@ -9,7 +9,7 @@ import { DataTable, type Column } from "@/components/ui/DataTable";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useTeam, type TeamMember } from "@/hooks/useTeam";
 import { useSession } from "next-auth/react";
-import { ROLES, type Role } from "@/lib/models/user";
+import { ROLES, type Role } from "@/lib/auth/roles";
 import { timeAgo } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 
